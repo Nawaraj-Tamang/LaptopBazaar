@@ -28,6 +28,12 @@ export default function CheckoutPage() {
     const user = JSON.parse(localStorage.getItem('userInfo'));
     if (!user) return navigate('/login');
 
+    // ✅ Validate shipping fields
+    if (!shippingAddress.address || !shippingAddress.city || !shippingAddress.postalCode || !shippingAddress.country) {
+      setError('Please fill in all required shipping fields.');
+      return;
+    }
+
     try {
       const orderData = {
         orderItems: cartItems.map(i => ({
@@ -50,9 +56,9 @@ export default function CheckoutPage() {
       });
 
       alert('Order placed successfully! Order ID: ' + data._id);
-      setCartItems([]); // clear cart context
-      localStorage.removeItem('cartItems'); // clear localStorage
-      navigate('/'); // or navigate to /order-confirmation/:id
+      setCartItems([]); 
+      localStorage.removeItem('cartItems'); 
+      navigate('/'); 
     } catch (err) {
       console.error(err);
       setError(err.response?.data?.message || 'Error placing order');
@@ -70,6 +76,7 @@ export default function CheckoutPage() {
           className="form-control mb-2"
           value={shippingAddress.address}
           onChange={e => setShippingAddress({...shippingAddress, address: e.target.value})}
+          required
         />
         <input
           type="text"
@@ -77,6 +84,7 @@ export default function CheckoutPage() {
           className="form-control mb-2"
           value={shippingAddress.city}
           onChange={e => setShippingAddress({...shippingAddress, city: e.target.value})}
+          required
         />
         <input
           type="text"
@@ -84,6 +92,7 @@ export default function CheckoutPage() {
           className="form-control mb-2"
           value={shippingAddress.postalCode}
           onChange={e => setShippingAddress({...shippingAddress, postalCode: e.target.value})}
+          required
         />
         <input
           type="text"
@@ -91,6 +100,7 @@ export default function CheckoutPage() {
           className="form-control mb-2"
           value={shippingAddress.country}
           onChange={e => setShippingAddress({...shippingAddress, country: e.target.value})}
+          required
         />
 
         <h3>Payment Method</h3>
