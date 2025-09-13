@@ -24,7 +24,7 @@ export default function HomePage() {
       if (confirmLogin) {
         navigate('/login');
       }
-      return; // stop here if not logged in
+      return; 
     }
 
     addToCart({
@@ -61,18 +61,19 @@ export default function HomePage() {
           filteredProducts.map(p => (
             <div className="col-sm-6 col-md-4 col-lg-4" key={p._id}>
               <div className="card h-100 d-flex flex-column">
-                <img
-                  src={p.image || 'https://via.placeholder.com/300x180'}
-                  className="card-img-top"
-                  alt={p.name}
-                  style={{ objectFit: 'cover', height: '180px' }}
-                />
+                <Link to={`/product/${p._id}`}>
+                  <img
+                    src={p.image || 'https://via.placeholder.com/300x180'}
+                    className="card-img-top"
+                    alt={p.name}
+                    style={{ objectFit: 'cover', height: '180px', cursor: 'pointer' }}
+                  />
+                </Link>
                 <div className="card-body d-flex flex-column">
                   <h5 className="card-title">{p.name}</h5>
                   <p className="card-text text-truncate">{p.description}</p>
                   <p><strong>Rs. {p.price}</strong></p>
                   <div className="mt-auto">
-                    <Link to={`/product/${p._id}`} className="btn btn-outline-primary w-100 mb-2">View</Link>
                     <button
                       className="btn btn-primary w-100"
                       onClick={() => handleAddToCart(p)}
