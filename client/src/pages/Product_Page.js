@@ -8,7 +8,7 @@ export default function ProductPage() {
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState(1);
-  const { addToCart, cartItems, setCartItems } = useContext(CartContext);
+  const { addToCart } = useContext(CartContext);
 
   useEffect(() => {
     api.get(`/products/${id}`)
@@ -17,22 +17,21 @@ export default function ProductPage() {
   }, [id]);
 
   const handleAddToCart = () => {
-    const exist = cartItems.find(item => item._id === product._id);
-    if (exist) {
-      setCartItems(
-        cartItems.map(item =>
-          item._id === product._id ? { ...item, qty: item.qty + parseInt(qty, 10) } : item
-        )
-      );
-    } else {
-      addToCart({
-        _id: product._id,
-        name: product.name,
-        image: product.image,
-        price: product.price,
-        qty: parseInt(qty, 10)
-      });
+    const user = JSON.parse(localStorage.getItem('userInfo'));
+    if (!user) {
+      alert('Please login first to add items to cart.');
+      navigate('/login');
+      return;
     }
+
+    addToCart({
+      _id: product._id,
+      name: product.name,
+      image: product.image,
+      price: product.price,
+      qty: parseInt(qty, 10)
+    });
+
     navigate('/cart');
   };
 

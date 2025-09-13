@@ -3,24 +3,27 @@ import { Link, useNavigate } from 'react-router-dom';
 import { CartContext } from '../CartContext';
 
 export default function Header() {
-  const { cartItems } = useContext(CartContext);
+  const { cartItems, setCartItems } = useContext(CartContext);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('userInfo'));
 
   const logout = () => {
+    // Keep per-user saved cart in localStorage so it can be restored next login.
     localStorage.removeItem('userInfo');
+    // Clear UI cart immediately so nothing is shown for logged-out user.
+    setCartItems([]);
     navigate('/');
-    window.location.reload();
   };
 
-  const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0);
+  const cartCount = Array.isArray(cartItems)
+    ? cartItems.reduce((sum, item) => sum + (item.qty || 0), 0)
+    : 0;
 
   return (
     <nav className="navbar navbar-expand-lg navbar-light bg-light">
       <div className="container">
         <Link className="navbar-brand" to="/">LaptopBazaar</Link>
 
-        {/* Navbar Toggler for Mobile */}
         <button
           className="navbar-toggler"
           type="button"
@@ -33,22 +36,28 @@ export default function Header() {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* Collapsible Navbar Links */}
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/cart">Cart ({cartCount})</Link>
-            </li>
+
+            {/* show cart only when user is logged in */}
+            {user && (
+              <li className="nav-item">
+                <Link className="nav-link" to="/cart">Cart ({cartCount})</Link>
+              </li>
+            )}
+
             {user ? (
               <>
                 <li className="nav-item">
                   <span className="nav-link">Hi, {user.name}</span>
                 </li>
+
                 {user.isAdmin && (
                   <li className="nav-item">
                     <Link className="nav-link" to="/admin">Admin</Link>
                   </li>
                 )}
+
                 <li className="nav-item">
                   <button className="btn btn-link nav-link" onClick={logout}>Logout</button>
                 </li>

@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import api from '../api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { CartContext } from '../CartContext';
 
 export default function HomePage() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
+  const { addToCart } = useContext(CartContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     api.get('/products')
@@ -12,17 +15,37 @@ export default function HomePage() {
       .catch(console.error);
   }, []);
 
-  // Filter products based on search query
+  const handleAddToCart = (product) => {
+    const user = JSON.parse(localStorage.getItem('userInfo'));
+    if (!user) {
+      const confirmLogin = window.confirm(
+        'You need to login to add items to the cart.\n\nPress OK to login, or Cancel to continue browsing as guest.'
+      );
+      if (confirmLogin) {
+        navigate('/login');
+      }
+      return; // stop here if not logged in
+    }
+
+    addToCart({
+      _id: product._id,
+      name: product.name,
+      image: product.image,
+      price: product.price,
+      qty: 1
+    });
+    navigate('/cart');
+  };
+
   const filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
-    p.description.toLowerCase().includes(search.toLowerCase())
+    (p.description || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (
     <div>
       <h2>Products</h2>
 
-      {/* Search Bar */}
       <div className="mb-3">
         <input
           type="text"
@@ -33,7 +56,6 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Product Grid */}
       <div className="row g-4">
         {filteredProducts.length > 0 ? (
           filteredProducts.map(p => (
@@ -50,9 +72,13 @@ export default function HomePage() {
                   <p className="card-text text-truncate">{p.description}</p>
                   <p><strong>Rs. {p.price}</strong></p>
                   <div className="mt-auto">
-                    <Link to={`/product/${p._id}`} className="btn btn-primary w-100">
-                      View
-                    </Link>
+                    <Link to={`/product/${p._id}`} className="btn btn-outline-primary w-100 mb-2">View</Link>
+                    <button
+                      className="btn btn-primary w-100"
+                      onClick={() => handleAddToCart(p)}
+                    >
+                      Add to Cart
+                    </button>
                   </div>
                 </div>
               </div>
